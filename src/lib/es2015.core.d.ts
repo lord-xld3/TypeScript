@@ -266,9 +266,49 @@ interface ObjectConstructor {
      * @param sources One or more source objects from which to copy properties.
      */
     assign<T extends object, O extends {}>(
+        target: T extends Function? never: T,
+        ...sources: (O extends Function? never: O[]) | { [K in keyof T]: T[K] }[]
+    ): T & (
+        O extends (boolean | string | number)? never 
+        :O extends Function? {[K in keyof O]: O[K]}
+        :O
+    );
+
+    /**
+     * Copy function properties to a function.
+     * @param source A function to copy properties from.
+     */
+    assign<T extends Function, O extends Function>(
         target: T,
-        ...sources: O[] | {[K in keyof T]: T[K]}[]
+        source: O | {[K in keyof T]: T[K]}
+    ): T & {[K in keyof O]: O[K]};
+
+    /**
+     * Copy properties to a function.
+     */
+    assign<T extends Function, O extends object>(
+        target: T,
+        ...sources: (O extends Function? never : O)[] | {[K in keyof T]: T[K]}[]
     ): T & O;
+    
+    /**
+     * Copy properties to a primitive target of (boolean | string | number).
+     * Makes the object comparable by primitive.
+     */
+    assign<T extends {}, O extends object>(
+        target: T,
+        ...sources: (O extends Function? never: O)[]
+    ): T & (O extends Function? {[K in keyof O]: O[K]}: O);
+
+    /**
+     * Copy properties of a function to a primitive target of (boolean | string | number).
+     * Makes the object comparable by primitive.
+     * @param source A function to copy properties from.
+     */
+    assign<T extends {}, O extends Function>(
+        target: T,
+        source: O
+    ): T & {[K in keyof O]: O[K]};
 
     /**
      * Returns an array of all symbol properties found directly on object o.
