@@ -259,56 +259,47 @@ interface NumberConstructor {
 }
 
 interface ObjectConstructor {
-    /**
-     * Copy the values of all of the enumerable own properties from one or more source objects to a
-     * target object. Returns the target object.
-     * @param target The target object to copy to.
-     * @param sources One or more source objects from which to copy properties.
+    /** 
+     * Copy enumerable properties to target object.
+     * @param target - Target object to return.
+     * @param source - Source object to copy properties from.
      */
-    assign<T extends object, O extends {}>(
-        target: T extends Function? never: T,
-        ...sources: (O extends Function? never: O[]) | { [K in keyof T]: T[K] }[]
-    ): T & (
-        O extends (boolean | string | number)? never 
-        :O extends Function? {[K in keyof O]: O[K]}
-        :O
-    );
+    assign<T extends {}, U extends {}>(
+        target: T,
+        source: (U extends (boolean | string | number)? never: U | {[K in keyof T]: T[K]}),
+    ): T & 
+    (U extends Function? {[K in keyof U]: U[K]}: U)
 
-    /**
-     * Copy function properties to a function.
-     * @param source A function to copy properties from.
+    /** 
+     * Copy enumerable properties to target object.
+     * @param target - Target object to return.
+     * @param source1 - First source object to copy properties from.
+     * @param source2 - Second source object to copy properties from.
      */
-    assign<T extends Function, O extends Function>(
+    assign<T extends {}, U extends {}, V extends {}>(
         target: T,
-        source: O | {[K in keyof T]: T[K]}
-    ): T & {[K in keyof O]: O[K]};
+        source1: (U extends (boolean | string | number)? never: U | {[K in keyof T]: T[K]}),
+        source2: (V extends (boolean | string | number)? never: V | {[K in keyof T]: T[K]}),
+    ): T & 
+    (U extends Function? {[K in keyof U]: U[K]}: U) & 
+    (V extends Function? {[K in keyof V]: V[K]}: V)
 
-    /**
-     * Copy properties to a function.
+    /** 
+     * Copy enumerable properties to target object.
+     * @param target - Target object to return.
+     * @param source1 - First source object to copy properties from.
+     * @param source2 - Second source object to copy properties from.
+     * @param source3 - Third source object to copy properties from.
      */
-    assign<T extends Function, O extends object>(
+    assign<T extends {}, U extends {}, V extends {}, W extends {}>(
         target: T,
-        ...sources: (O extends Function? never : O)[] | {[K in keyof T]: T[K]}[]
-    ): T & O;
-    
-    /**
-     * Copy properties to a primitive target of (boolean | string | number).
-     * Makes the object comparable by primitive.
-     */
-    assign<T extends {}, O extends object>(
-        target: T,
-        ...sources: (O extends Function? never: O)[]
-    ): T & (O extends Function? {[K in keyof O]: O[K]}: O);
-
-    /**
-     * Copy properties of a function to a primitive target of (boolean | string | number).
-     * Makes the object comparable by primitive.
-     * @param source A function to copy properties from.
-     */
-    assign<T extends {}, O extends Function>(
-        target: T,
-        source: O
-    ): T & {[K in keyof O]: O[K]};
+        source1: (U extends (boolean | string | number)? never: U | {[K in keyof T]: T[K]}),
+        source2: (V extends (boolean | string | number)? never: V | {[K in keyof T]: T[K]}),
+        source3: (W extends (boolean | string | number)? never: W | {[K in keyof T]: T[K]}),
+    ): T & 
+    (U extends Function? {[K in keyof U]: U[K]}: U) & 
+    (V extends Function? {[K in keyof V]: V[K]}: V) &
+    (W extends Function? {[K in keyof W]: W[K]}: W)
 
     /**
      * Returns an array of all symbol properties found directly on object o.

@@ -1,114 +1,73 @@
-// console.log macro
-const z = (...args: any) => {
-    console.log(...args)
-};
+const obj1 = {a: "a"}
+const obj2 = {b: "b"}
+const obj3 = {c: "c"}
 
-{ // Assigning functions
-    let a = {a: 1, b:1, c: true, undefined}
-    let b = {0: -1, 1: 1}
-    let c = { ...a, ...b };
-    let d = {z, ...c} // Assigning properties to a function
+const funcA = (x: string)=>{}
+const funcB = (y: number)=>{}
+const funcC = (z: object)=>{}
+const funcD = Object.assign(funcA, obj1)
 
-    // Expect errors.
-    try {
-        d();
-    } catch(e) {z("a = {b, ...c} throws: TypeError: not a function", true)}
-    try {
-        //Error
-        Object.assign( {}, z )();
-    } catch(e) {z("Object.assign({}, function(){})() throws: This expression is not callable:", true)}
+{/* Assigning enumerable values to an object */ 
+    const A = Object.assign({}, obj1)
+    const B = Object.assign(obj1, {})
+    const C = Object.assign(obj1, obj2)
+    const D = Object.assign(obj1, obj2, obj3)
+    
+    // Expect error without a 'catch-all' overload
+    const E = Object.assign({})
+
+    const F = Object.assign({}, funcA)
+    F("s") // Expect 'not callable'
+
+    // Assigning enumerable values of a function to an object
+    const G = Object.assign({}, funcD)
+    G("s") // Expect 'not callable'
+    G.a // 'a'
+
+    const H = Object.assign(obj1, [1, 2, 3])
+    H[0] // '1'
 }
 
-{ // Copy properties to a function with Object.assign()
-    let f = Object.assign(z, { a: 1 });
-    f("Object.assign(target, {}) references the target function:", true)
-    f("Can access property on Object.assign(z, { a: 1 }):", (f.a === 1))
+{/* Assigning enumerable values to a function */
+    const A = Object.assign(funcA, obj1)
+    const B = Object.assign(A, obj2)
+    const C = Object.assign(()=>{}, B)
+    const D = Object.assign(funcA, A, B)
+    const E = Object.assign(funcA, [1, 2, 3])
+    E[0] // '1'
 
-
-    // f() is immutable.
-    Object.assign(f, ()=>{})
-    f("Cannot override a function with Object.assign():", true)
-
-    f = ()=>{};
-    z("Assigning a function to a function creates a new function:", (f() == undefined))
+    const F = Object.assign(obj1, ()=>{}) // no props to copy
 }
 
-{ // Primitive objects
-    let g = 3.01;
-    let h = Object.assign(g, {
-        setValue: (n: number) => {g = n}
-    })
+{/* Assigning enumerable values to a primitive */
+    const A = Object.assign(true, obj1)
+    const B = Object.assign(3.14, obj1)
+    const C = Object.assign("s", obj1)
 
-    z("Method on a primitive:", h)
-    z("Object is == comparable to primitive:", (h == g))
-    h.setValue(1.02)
-    z("Method updates primitive:", (h.valueOf() != g))
-
-    let j = 1.5
-    let k = Object.assign(j, {
-        setValue: (n: number) => {j = n}
-    })
-    h.setValue(3.01)
-    z("Comparable to another primitive object:", (h > k))
-    //Infer
-    let m = Object.assign(z, h)
-    z("Cannot assign primitive Object to a function:", (m === z) )
+    /* Assigning "PrimObjects" to an object */
+    const D = Object.assign(obj1, A)
+    const E = Object.assign(obj1, B)
+    const F = Object.assign(obj1, C)
+    
+    /* Assigning a "PrimObject" to a function */
+    const G = Object.assign(funcA, A)
 }
 
-{ // Mutating a function
-    let n = () => {}
-    let o = Object.assign(n, {
-        setFunc: (func: any) => n = func
-    })
-    o.setFunc( () => true)
-    z("Mutating a function creates a new function:", n() && (o() === undefined))
+{/* Assigning primitives to an object */
+    const A = Object.assign(obj1, true)
+    const B = Object.assign(obj1, 3.14)
+    const C = Object.assign(obj1, "s")
 }
 
-
-{ // Copy function properties
-    let p = Object.assign(z, Object.assign(z, { a: "a" }))
-    //Infer
-    let q = Object.assign({}, p)
-    z("Can copy properties from a function to a function with Object.assign(): ", (p.a === "a"))
-    z("Can copy properties from a function with Object.assign(): ", (q.a === "a"))
+{/* Assigning primitives to a function */
+    const A = Object.assign(funcA, true)
+    const B = Object.assign(funcA, 3.14)
+    const C = Object.assign(funcA, "s")
 }
 
-{ // Source primitives are not assigned
-    //Infer
-    let r = Object.assign({}, true)
-    //Infer
-    let s = Object.assign({}, "a")
-    //Infer
-    let t = Object.assign({}, 1)
-    //Infer
-    let u = Object.assign({}, true, {a: "a"})
-    z("Object.assign({}, true) != true:", r != true)
-    z("Object.assign({}, 1) != 1):", t != 1)
-    z(`Object.assign({}, "a") != "a"):`, s != "a")
-    //Fix: correct inference of 'u' discourages this fix.
-    z("Primitive values skipped: ", (u.a === "a"));
-    //Error
-    (u != true)
+{/* Assigning mixed functions and objects */
+    const A = Object.assign(obj1, obj2, funcA)
+    const B = Object.assign(funcA, obj1, obj2, obj3)
+    const C = Object.assign(funcA, funcB, obj1)
+    const D = Object.assign(funcA, obj1, funcB)
 }
-
-{ // Anonymous functions
-    let u = ()=>{}
-    let t = Object.assign(u, ()=>{}, {a: "a"})
-    //Error
-    z("Can't assign properties from anonymous function:", (t.a === "a"))
-
-    let v = Object.assign(()=>{}, {a: "a"})
-    //Infer
-    let w = Object.assign((...args: any)=>{z(...args)}, v)
-    w("Can assign function properties to anonymous function:", (w.a === "a") )
-
-    let x = Object.assign(()=>{}, {a: "a"})
-    z("Can assign properties to anonymous function:", (x.a === "a"))
-}
-
-// Match overloads
-Object.assign({}, {})
-Object.assign(()=>{}, {a: "a"})
-Object.assign(()=>{}, ()=>{})
-Object.assign(true, {})
-Object.assign(true, ()=>{})
